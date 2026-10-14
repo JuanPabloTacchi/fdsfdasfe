@@ -1,0 +1,432 @@
+<mxfile host="app.diagrams.net">
+  <!-- ======================================================================= -->
+  <!-- PÁGINA 1: FLUJO GENERAL                                                  -->
+  <!-- ======================================================================= -->
+  <diagram id="pipeline" name="1. Flujo general">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ================= ENTRADAS ================= -->
+        <mxCell id="i1" value="&lt;b&gt;Plano&lt;/b&gt;&lt;br&gt;plano.dxf (capas GONDOLA, ZONA, MURO, ENTRADA, CAJA)&lt;br&gt;+ gondolas.csv + zonas.csv" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="i2" value="&lt;b&gt;Ventas y maestro SKU&lt;/b&gt;&lt;br&gt;ventas.csv (semana × tienda × SKU)&lt;br&gt;skus.csv (medidas, precio, costo)" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="330" y="20" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="i3" value="&lt;b&gt;Categorías&lt;/b&gt;&lt;br&gt;rol, prob_lista, frac_impulso&lt;br&gt;+ reglas de zona" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="20" width="160" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="i4" value="&lt;b&gt;Afinidad&lt;/b&gt;&lt;br&gt;afinidad_categorias.csv&lt;br&gt;&lt;i&gt;hoy sintético; luego LLM / boletas&lt;/i&gt;" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="790" y="20" width="160" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="i5" value="&lt;b&gt;Parámetros del modelo&lt;/b&gt;&lt;br&gt;config.py: β, γ, reposiciones, frentes máx., tiempos" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="990" y="20" width="260" height="85" as="geometry" />
+        </mxCell>
+
+        <!-- ================= ETAPA 1 ================= -->
+        <mxCell id="s1" value="1. Plano → grafo" style="swimlane;startSize=40;html=1;whiteSpace=wrap;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="150" width="260" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s1a" value="Leer DXF (ezdxf), unidades a metros, ids desde los textos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="55" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s1b" value="Góndola → caras (lados con pasillo enfrente) → tramos → repisas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="137" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s1c" value="Contención 3D: repisa DENTRO_DE zona → qué categorías acepta" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="219" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s1d" value="Navmesh: área caminable en celdas de 0,5 m conectadas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="301" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s1e" value="Vecindades entre tramos: contiguos en la cara y enfrentados en el pasillo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="383" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s1f" value="&lt;i&gt;planogram/ingesta/&lt;/i&gt;" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="s1">
+          <mxGeometry x="15" y="520" width="230" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ================= ETAPA 2 ================= -->
+        <mxCell id="s2" value="2. Tráfico de referencia y curvas" style="swimlane;startSize=40;html=1;whiteSpace=wrap;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="330" y="150" width="260" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s2a" value="Clientes que visitan tramos &lt;b&gt;al azar&lt;/b&gt; → tráfico de referencia (queda fijo: así se observó la demanda)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="55" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s2b" value="Visibilidad de cada repisa: cabecera / isla, cercanía a la entrada, altura de los ojos" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="137" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s2c" value="Demanda base de cada SKU = promedio semanal histórico de la tienda" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="219" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s2d" value="Curva de cada categoría: utilidad vs. metros de repisa (análisis marginal de frentes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="301" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s2f" value="&lt;i&gt;scoring.py, demanda.py, optim/surtido.py&lt;/i&gt;" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="s2">
+          <mxGeometry x="15" y="520" width="230" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ================= ETAPA 3a ================= -->
+        <mxCell id="s3" value="3a. Categorías ↔ tráfico (ciclo)" style="swimlane;startSize=40;html=1;whiteSpace=wrap;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="620" y="150" width="330" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s3a" value="Exposición de cada tramo = pasadas frente a él / tráfico de referencia" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="55" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s3b" value="&lt;b&gt;CP-SAT: categoría de cada tramo&lt;/b&gt;. Utilidad por espacio + premio por tráfico (según impulso) + bloques continuos + afinidad − categorías por cara − vacíos. Respeta zonas." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="127" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="s3c" value="Simular clientes con &lt;b&gt;listas de compra&lt;/b&gt; en ese layout → tráfico nuevo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="224" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s3d" value="Valor del layout medido con &lt;b&gt;su propio&lt;/b&gt; tráfico" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="296" width="260" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="s3e" value="Mezclar tráfico 50/50 con el anterior; parar si cambia &amp;lt; 2 % de los tramos (máx. 4 vueltas)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="363" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s3f" value="Quedarse con la vuelta de &lt;b&gt;mayor valor&lt;/b&gt; y su tráfico" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="440" width="260" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="s3g" value="&lt;i&gt;optim/ciclo.py, optim/macro.py&lt;/i&gt;" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="s3">
+          <mxGeometry x="15" y="520" width="260" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_ab" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="s3" source="s3a" target="s3b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_bc" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="s3" source="s3b" target="s3c">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_cd" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="s3" source="s3c" target="s3d">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_de" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="s3" source="s3d" target="s3e">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_ef" value="listo" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="s3" source="s3e" target="s3f">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_loop" value="otra vuelta" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d79b00;fontColor=#d79b00;fontSize=10;exitX=1;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="s3" source="s3e" target="s3a">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="305" y="393" />
+              <mxPoint x="305" y="85" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ================= ETAPA 3b ================= -->
+        <mxCell id="s4" value="3b. SKUs → repisas" style="swimlane;startSize=40;html=1;whiteSpace=wrap;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="990" y="150" width="260" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s4a" value="Por categoría, dentro de sus tramos y con el tráfico del layout elegido (sin ciclo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="55" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s4b" value="Surtido y frentes: análisis marginal sobre el 95 % del espacio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="137" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s4c" value="&lt;b&gt;CP-SAT&lt;/b&gt;: cada SKU a una repisa donde quepa (alto, fondo, ancho), los que más venden donde más se ve" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="219" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s4d" value="Relleno: frentes extra en el espacio que sobra" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="301" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s4e" value="Orden en la repisa: bloques por marca, de izquierda a derecha" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="383" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s4f" value="&lt;i&gt;optim/micro.py&lt;/i&gt;" style="text;html=1;fontSize=10;fontColor=#6c8ebf;align=left;" vertex="1" parent="s4">
+          <mxGeometry x="15" y="520" width="230" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ================= ETAPA 4 ================= -->
+        <mxCell id="s5" value="4. Evaluación" style="swimlane;startSize=40;html=1;whiteSpace=wrap;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1280" y="150" width="260" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s5a" value="Referencia: categorías en orden de lectura, frentes ∝ venta (la práctica habitual)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="55" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s5b" value="Cada layout se evalúa con el tráfico que &lt;b&gt;él mismo&lt;/b&gt; genera" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="137" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s5c" value="Validador independiente: ancho, alto, fondo, zonas, duplicados" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="219" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s5d" value="KPIs: utilidad, recorrido del cliente, ocupación, afinidad, bloques" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="301" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s5e" value="Descomposición: cuánto aporta cada nivel (cruza categorías y SKUs de ambas soluciones)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="383" width="230" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="s5f" value="&lt;i&gt;optim/base.py, evaluacion.py&lt;/i&gt;" style="text;html=1;fontSize=10;fontColor=#82b366;align=left;" vertex="1" parent="s5">
+          <mxGeometry x="15" y="520" width="230" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ================= SALIDAS ================= -->
+        <mxCell id="s6" value="Salidas (salida/&amp;lt;tienda&amp;gt;/)" style="swimlane;startSize=40;html=1;whiteSpace=wrap;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1570" y="150" width="280" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s6a" value="&lt;b&gt;planograma.csv&lt;/b&gt;: SKU, repisa, x, frentes, venta y utilidad esperadas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="55" width="250" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s6b" value="&lt;b&gt;planogramas.pdf&lt;/b&gt;: vista frontal de cada cara" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="127" width="250" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s6c" value="&lt;b&gt;planograma.dxf&lt;/b&gt;: el plano + capa PLANOGRAMA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="189" width="250" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="s6d" value="Mapas: categorías y tráfico (optimizado vs. referencia), pasillos.csv, conflictos de afinidad" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="251" width="250" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s6e" value="iteraciones_trafico.csv, resumen.json, violaciones.txt, avisos.txt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="323" width="250" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s6f" value="&lt;b&gt;Vista 3D en Blender&lt;/b&gt;: python -m planogram blender --tienda T01 [--version referencia]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="395" width="250" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s6g" value="&lt;i&gt;salida.py, herramientas/blender_tienda.py&lt;/i&gt;" style="text;html=1;fontSize=10;fontColor=#82b366;align=left;" vertex="1" parent="s6">
+          <mxGeometry x="15" y="520" width="250" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ================= PRÓXIMO PASO ================= -->
+        <mxCell id="prox" value="&lt;b&gt;Próximo: búsqueda de categorías destino&lt;/b&gt;&lt;br&gt;Mover a propósito los bloques de las categorías que la gente viene a buscar (Abarrotes, Limpieza…) y evaluar cada opción corriendo el ciclo 3a. Ver página 2." style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="620" y="740" width="330" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="e_prox" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="prox" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ================= FLECHAS ================= -->
+        <mxCell id="e_i1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;" edge="1" parent="1" source="i1" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_i2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;" edge="1" parent="1" source="i2" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_i3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;entryX=0.25;entryY=0;" edge="1" parent="1" source="i3" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_i4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;entryX=0.75;entryY=0;" edge="1" parent="1" source="i4" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_i5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d6b656;" edge="1" parent="1" source="i5" target="s4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" value="grafo" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="s1" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" value="tráfico ref.&lt;br&gt;+ curvas" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="s2" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e34" value="categoría por&lt;br&gt;tramo + su tráfico" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="s3" target="s4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e45" value="planograma" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="s4" target="s5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e56" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeWidth=2;fontSize=11;" edge="1" parent="1" source="s5" target="s6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_fb" value="Futuro: con ventas reales después del cambio, calibrar β, γ, prob_lista, frac_impulso y afinidad" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#b85450;fontColor=#b85450;fontSize=11;exitX=0.5;exitY=1;entryX=0.5;entryY=1;" edge="1" parent="1" source="s5" target="s2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1410" y="870" />
+              <mxPoint x="460" y="870" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="note_store" value="Todo corre &lt;b&gt;por tienda&lt;/b&gt;: python -m planogram optimizar --tienda T01" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="740" width="420" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ======================================================================= -->
+  <!-- PÁGINA 2: CICLO CATEGORÍAS ↔ TRÁFICO Y PRÓXIMA BÚSQUEDA                  -->
+  <!-- ======================================================================= -->
+  <diagram id="ciclo" name="2. Ciclo categorías ↔ tráfico">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="c0" value="Tráfico de referencia&lt;br&gt;(clientes que visitan tramos al azar)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" value="Exposición de cada tramo = pasadas frente a él / pasadas de referencia" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="120" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c2" value="&lt;b&gt;CP-SAT de categorías&lt;/b&gt;&lt;br&gt;parte de la solución de la vuelta anterior" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="210" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c3" value="&lt;b&gt;Simular clientes con listas de compra&lt;/b&gt; en ese layout → tráfico nuevo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="310" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c4" value="Valor del layout con &lt;b&gt;su propio&lt;/b&gt; tráfico&lt;br&gt;= Σ curva_c(metros_c) × multiplicador medio_c" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="410" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c5" value="¿Cambió &amp;lt; 2 % de los tramos&lt;br&gt;o ya van 4 vueltas?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="510" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="c6" value="Tráfico = 50 % anterior + 50 % nuevo&lt;br&gt;&lt;i&gt;(amortigua oscilaciones)&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="20" y="530" width="220" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="c7" value="Quedarse con la vuelta de &lt;b&gt;mayor valor&lt;/b&gt;&lt;br&gt;(no necesariamente la última)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="660" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c8" value="Etapa 3b: SKUs → repisas&lt;br&gt;con el tráfico de ese layout" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="300" y="750" width="240" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ce01" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c0" target="c1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c1" target="c2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce23" value="categoría de cada tramo" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="1" source="c2" target="c3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce34" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c3" target="c4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce45" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c4" target="c5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce56" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=11;" edge="1" parent="1" source="c5" target="c6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce61" value="otra vuelta" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#d79b00;fontColor=#d79b00;fontSize=10;exitX=0.5;exitY=0;entryX=0;entryY=0.5;" edge="1" parent="1" source="c6" target="c1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="130" y="150" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="ce57" value="sí" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=11;" edge="1" parent="1" source="c5" target="c7"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="ce78" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="c7" target="c8"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+        <!-- notas explicativas -->
+        <mxCell id="n2" value="&lt;b&gt;Qué maximiza el CP-SAT&lt;/b&gt;&lt;br&gt;+ utilidad de cada categoría según sus metros (curva cóncava)&lt;br&gt;+ premio por ubicar categorías de impulso donde pasa gente&lt;br&gt;+ tramos contiguos de la misma categoría&lt;br&gt;+ afinidad: afines enfrentadas en el pasillo&lt;br&gt;− afinidad negativa: opuestas contiguas o enfrentadas&lt;br&gt;− cada categoría distinta en una misma cara&lt;br&gt;− tramos vacíos&lt;br&gt;&lt;i&gt;Restricción dura: zonas (frío, congelado, con llave)&lt;/i&gt;" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="170" width="380" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="&lt;b&gt;Cómo camina un cliente simulado&lt;/b&gt;&lt;br&gt;1. Arma su lista: cada categoría entra con su prob_lista (Lácteos ~60 %, Cervezas ~9 %)&lt;br&gt;2. Por cada producto de la lista va a un tramo de esa categoría, sorteado según sus metros&lt;br&gt;3. Hace 1 parada al azar&lt;br&gt;4. Va siempre a la parada pendiente más cercana y termina en la caja más cercana&lt;br&gt;Cada celda del pasillo cuenta cuántas veces pasó gente" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="345" width="380" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="&lt;b&gt;Modelo de demanda de un SKU&lt;/b&gt;&lt;br&gt;venta = base × multiplicador × (frentes / frentes_ref)^β, limitada por el stock que cabe&lt;br&gt;multiplicador = [(1 − impulso) + impulso × exposición] × visibilidad^γ&lt;br&gt;&lt;i&gt;La parte planificada se vende aunque nadie pase; la de impulso depende de cuánta gente pasa. Como la referencia es fija, si el layout hace caminar más, se vende más por impulso.&lt;/i&gt;" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="500" width="380" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="&lt;b&gt;Limitación&lt;/b&gt;: el ciclo encuentra un &lt;i&gt;equilibrio&lt;/i&gt;. El CP-SAT toma el tráfico como dado, así que nunca decide &quot;pongo esto lejos para arrastrar gente&quot;." style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="660" width="380" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- próximo paso: búsqueda de destinos -->
+        <mxCell id="b0" value="Próximo: búsqueda de categorías destino" style="swimlane;startSize=36;html=1;whiteSpace=wrap;rounded=1;dashed=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="120" width="560" height="560" as="geometry" />
+        </mxCell>
+        <mxCell id="b1" value="Partir del mejor layout del ciclo" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="b0">
+          <mxGeometry x="20" y="55" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" value="Proponer un movimiento: llevar el bloque de una categoría destino (Abarrotes, Limpieza, Desayuno…) a otra zona de la tienda" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="b0">
+          <mxGeometry x="20" y="130" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="b3" value="Fijar esa ubicación como restricción y re-correr el ciclo (CP-SAT + simulación)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="b0">
+          <mxGeometry x="20" y="225" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b4" value="¿El valor (con su propio tráfico) mejoró?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=11;" vertex="1" parent="b0">
+          <mxGeometry x="40" y="310" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="b5" value="Aceptar el movimiento" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="b0">
+          <mxGeometry x="350" y="325" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b6" value="Repetir N movimientos; devolver el mejor layout encontrado" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="b0">
+          <mxGeometry x="20" y="460" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="be12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="b0" source="b1" target="b2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="be23" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="b0" source="b2" target="b3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="be34" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="b0" source="b3" target="b4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="be45" value="sí" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=11;" edge="1" parent="b0" source="b4" target="b5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="be46" value="no: descartar" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="b0" source="b4" target="b6"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="be52" value="siguiente movimiento" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;strokeColor=#b85450;fontColor=#b85450;fontSize=10;exitX=0.5;exitY=0;entryX=1;entryY=0.5;" edge="1" parent="b0" source="b5" target="b2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b_link" value="usa el ciclo de la izquierda en cada intento" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;strokeColor=#b85450;fontColor=#b85450;fontSize=10;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" edge="1" parent="1" source="b3" target="c2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1000" y="375" />
+              <mxPoint x="1000" y="140" />
+              <mxPoint x="575" y="140" />
+              <mxPoint x="575" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ======================================================================= -->
+  <!-- PÁGINA 3: MODELO DE GRAFO                                                -->
+  <!-- ======================================================================= -->
+  <diagram id="grafo" name="3. Modelo de grafo">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1450" pageHeight="960" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="n_tienda" value="&lt;b&gt;Tienda&lt;/b&gt;&lt;hr&gt;id&lt;br&gt;contorno, muros&lt;br&gt;tráfico de referencia" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_gondola" value="&lt;b&gt;Góndola&lt;/b&gt;&lt;hr&gt;id, polígono&lt;br&gt;alto&lt;br&gt;tipo: lineal | cabecera | isla | mueble frío" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="260" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n_cara" value="&lt;b&gt;Cara&lt;/b&gt;&lt;hr&gt;id (ej. G-02:E)&lt;br&gt;orientación E/N/O/S, lado largo/corto&lt;br&gt;p0 → p1 (izq. a der. mirándola)&lt;br&gt;normal (hacia el pasillo)&lt;br&gt;profundidad de repisa" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="330" y="260" width="220" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n_tramo" value="&lt;b&gt;Tramo&lt;/b&gt;&lt;hr&gt;orden en la cara, x0, ancho&lt;br&gt;tráfico (pasadas por cliente)&lt;br&gt;visibilidad (cabecera, entrada)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="620" y="260" width="210" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n_repisa" value="&lt;b&gt;Repisa&lt;/b&gt; (slot)&lt;hr&gt;nivel, z, hueco libre&lt;br&gt;ancho, profundidad, huella&lt;br&gt;f_vertical, visibilidad_rel&lt;br&gt;exposición (del tráfico)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="910" y="260" width="210" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_pasillo" value="&lt;b&gt;Pasillo (celda del navmesh)&lt;/b&gt;&lt;hr&gt;centro, holgura&lt;br&gt;tráfico (pasadas por cliente)" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="330" y="40" width="220" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_poi" value="&lt;b&gt;Punto de interés&lt;/b&gt;&lt;hr&gt;clase: entrada | caja&lt;br&gt;polígono" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="620" y="40" width="210" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n_cat" value="&lt;b&gt;Categoría&lt;/b&gt;&lt;hr&gt;id, nombre&lt;br&gt;rol: destino | rutina | impulso | conveniencia&lt;br&gt;prob_lista, frac_impulso" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="330" y="540" width="240" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="n_sku" value="&lt;b&gt;SKU&lt;/b&gt; &lt;i&gt;(tabla, no está en el grafo)&lt;/i&gt;&lt;hr&gt;id, marca&lt;br&gt;ancho × alto × prof.&lt;br&gt;margen, demanda semanal&lt;br&gt;frentes_ref" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=11;arcSize=6;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="910" y="540" width="210" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="r1" value="CONTIENE" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="1" source="n_tienda" target="n_gondola"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r2" value="TIENE_CARA" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="1" source="n_gondola" target="n_cara"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r3" value="TIENE_TRAMO" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="1" source="n_cara" target="n_tramo"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r4" value="TIENE_REPISA" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;" edge="1" parent="1" source="n_tramo" target="n_repisa"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r5" value="DA_A {distancia}" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#82b366;" edge="1" parent="1" source="n_cara" target="n_pasillo"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r6" value="CONECTA {distancia}" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;fontSize=10;strokeColor=#82b366;exitX=1;exitY=0.25;entryX=1;entryY=0;" edge="1" parent="1" source="n_pasillo" target="n_pasillo">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="590" y="70" /><mxPoint x="590" y="20" /><mxPoint x="550" y="20" /></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="r7" value="UBICADO_EN" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#82b366;" edge="1" parent="1" source="n_poi" target="n_pasillo"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r8b" value="categoría asignada (resultado 3a)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#d79b00;dashed=1;exitX=0.5;exitY=1;entryX=1;entryY=0.25;" edge="1" parent="1" source="n_tramo" target="n_cat"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r9" value="PERTENECE_A" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#d79b00;entryX=1;entryY=0.75;" edge="1" parent="1" source="n_sku" target="n_cat"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r10" value="ubicado en {x, frentes} (resultado 3b)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#d79b00;dashed=1;" edge="1" parent="1" source="n_sku" target="n_repisa"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="r11" value="AFIN_A {peso −1..1}" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;fontSize=10;strokeColor=#d79b00;exitX=0;exitY=0.25;entryX=0;entryY=0.75;" edge="1" parent="1" source="n_cat" target="n_cat">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="305" y="570" /><mxPoint x="305" y="630" /></Array></mxGeometry>
+        </mxCell>
+
+        <mxCell id="n_zona" value="&lt;b&gt;Zona (cubo)&lt;/b&gt;&lt;hr&gt;id, polígono en planta&lt;br&gt;z_min, z_max&lt;br&gt;exclusiva (bool)&lt;br&gt;&lt;i&gt;sale de la capa ZONA&lt;/i&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="260" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="n_tipozona" value="&lt;b&gt;TipoZona&lt;/b&gt;&lt;hr&gt;refrigerado | congelado | seguridad | ..." style="rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacingLeft=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="540" width="200" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="rz1" value="DENTRO_DE&lt;br&gt;(contención 3D)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#9673a6;" edge="1" parent="1" source="n_repisa" target="n_zona"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="rz2" value="ES_DE_TIPO" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#9673a6;" edge="1" parent="1" source="n_zona" target="n_tipozona"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="rz3" value="PERMITIDA_EN {obligatoria: bool}" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;fontSize=10;strokeColor=#9673a6;exitX=0.5;exitY=1;entryX=0.5;entryY=1;" edge="1" parent="1" source="n_cat" target="n_tipozona">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="450" y="740" /><mxPoint x="1300" y="740" /></Array></mxGeometry>
+        </mxCell>
+
+        <mxCell id="rule" value="&lt;b&gt;Regla de compatibilidad&lt;/b&gt; (filtro antes de optimizar)&lt;br&gt;• repisa SIN zona → acepta categorías sin zona obligatoria&lt;br&gt;• repisa EN zona tipo T → acepta categorías PERMITIDA_EN T (y, si la zona no es exclusiva, las que no tienen zona obligatoria)" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="770" width="560" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="vec" value="&lt;b&gt;Vecindad&lt;/b&gt; (se calcula, no se guarda): tramos contiguos en la misma cara (&lt;i&gt;lado&lt;/i&gt;) y tramos enfrentados en un pasillo sin góndola entremedio (&lt;i&gt;frente&lt;/i&gt;). La usan la afinidad y la tabla de pasillos." style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="620" y="880" width="560" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lg" value="&lt;b&gt;Leyenda&lt;/b&gt;&lt;br&gt;🟦 Físico (sale del CAD)&lt;br&gt;🟩 Navegación (navmesh)&lt;br&gt;🟧 Negocio (maestros / reglas)&lt;br&gt;🟪 Zonas&lt;br&gt;- - - Relación que produce el optimizador" style="shape=note;whiteSpace=wrap;html=1;size=14;align=left;verticalAlign=top;spacingLeft=8;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="540" width="240" height="130" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

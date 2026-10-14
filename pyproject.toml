@@ -1,0 +1,27 @@
+[project]
+name = "planogram"
+version = "0.1.0"
+description = "Generación de layouts y planogramas a partir de planos CAD"
+requires-python = ">=3.10"
+dependencies = [
+    "ezdxf>=1.4",
+    "shapely>=2.1",
+    "networkx>=3.4",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "ortools>=9.10",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["planogram*"]
